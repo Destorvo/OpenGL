@@ -1,0 +1,20 @@
+﻿  texture.cpp
+main.obj : error LNK2019: unresolved external symbol glutInit referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutInitDisplayMode referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutInitWindowPosition referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutInitWindowSize referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutMainLoop referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutCreateWindow referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutPostRedisplay referenced in function "void __cdecl animate(int)" (?animate@@YAXH@Z)
+main.obj : error LNK2019: unresolved external symbol glutSwapBuffers referenced in function "void __cdecl graficar(void)" (?graficar@@YAXXZ)
+main.obj : error LNK2019: unresolved external symbol glutSetCursor referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutWarpPointer referenced in function "void __cdecl renderCameraView(void)" (?renderCameraView@@YAXXZ)
+main.obj : error LNK2019: unresolved external symbol glutDisplayFunc referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutReshapeFunc referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutMouseFunc referenced in function main
+main.obj : error LNK2019: unresolved external symbol glutIdleFunc referenced in function "void __cdecl mouse(int,int,int,int)" (?mouse@@YAXHHHH@Z)
+main.obj : error LNK2019: unresolved external symbol glutTimerFunc referenced in function "void __cdecl animate(int)" (?animate@@YAXH@Z)
+main.obj : error LNK2019: unresolved external symbol glutGet referenced in function "void __cdecl renderCameraView(void)" (?renderCameraView@@YAXXZ)
+main.obj : error LNK2019: unresolved external symbol glutSolidCube referenced in function "void __cdecl graficar(void)" (?graficar@@YAXXZ)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\lib\x64\glut32.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+C:\Users\USUARIO\OneDrive\Escritorio\GIT\CPG\finalCPG\x64\Debug\finalCPG.exe : fatal error LNK1120: 17 unresolved externals
