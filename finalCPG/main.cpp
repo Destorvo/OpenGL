@@ -1,185 +1,28 @@
-
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <windows.h>
-
 #include "glm.h"
 #include "texture.h"
 #include "stdafx.h"
-
+#include "camera.h"
 
 #define PI 3.1415926535897932
 
+float adelante= 0.0,
+costados = 0.0,
+altura = 0.0,
+ojos = 8.6,
+apunta = 8.6,
+girar = 0.0;
+
+double horizontal_angle = 0.0;
+double rotation_speed = 1.0;  // Puedes ajustar la velocidad según tu preferencia
+
+
+float anguloX = 0.0f;  // Ángulo en el eje X
+float anguloY = 0.0f;  // Ángulo en el eje Y
+
 double camera_angle;
-float velocidadCadena = 0;
-float velocidadBrazoDer = 0.3, velocidadBrazoIzq = 0.3, velocidadPiernaIzq = 0.2, velocidadPiernaDer = 0.2;
-int dir2 = 1, dir3 = 1, dir4 = 1;
-
-float ypoz = 0, zpoz = 0, anguloBrazoIzq = 10, anguloBrazoDer = -10, anguloPiernaIzq = 0, anguloPiernaDer = 0;
-
-    int windowHeight ;
-    int windowWidth;
-    bool forward = false;
-    bool backward = false;
-    bool left = false;
-    bool right = false;
-    float previousTime = 0;
-    float moveforward_backward = 50.0f;
-    float moveSiteward = 30.0f;
-    //Gibt die Position des Betrachters an.
-    float eyeX = 0.0f;
-    float eyeY = 1.85f;
-    float eyeZ = 3.0f;
-    //centerX, centerY, centerZ 	Gibt die Position des Refernenzpunktes an, auf den "geblickt" wird.
-    float centerX = 0.0f;
-    float centerY = 0.0f;
-    float centerZ = 0.0f;
-    //upX, upY, upZ 	Gibt die Richtung des Vektors an, der nach oben zeigt.
-    float mouseDirectionX = 0;
-    float mouseDirectionY = 0;
-
-    bool mouseWarp = true;
-
-
-
-	void changeSize(int w, int h)
-	{
-		int windowHeight = w;
-		int windowWidth = h;
-		// Prevent a divide by zero, when window is too short
-		// (you cant make a window of zero width).
-		if(h == 0)
-			h = 1;
-		float ratio = 1.0* w / h;
-
-		// Use the Projection Matrix
-		glMatrixMode(GL_PROJECTION);
-
-	        // Reset Matrix
-		glLoadIdentity();
-
-		// Set the viewport to be the entire window
-		glViewport(0, 0, w, h);
-
-		// Set the correct perspective.
-		gluPerspective(45,ratio,1,1000);
-
-		// Get Back to the Modelview
-		glMatrixMode(GL_MODELVIEW);
-	}
-
-
-	void mousePosition(int x, int y)
-	{
-		if(mouseWarp)
-		{
-			mouseDirectionX -= (x - windowWidth/2) * 0.1f;
-			mouseDirectionY += (y - windowHeight/2) * 0.1f;
-			if(mouseDirectionY > 180) mouseDirectionY = 180;
-			else if(mouseDirectionY < 0) mouseDirectionY = 0;
-		}
-	}
-
-	void renderCameraView()
-	{
-
-	    int currentTime = glutGet(GLUT_ELAPSED_TIME);
-	    int timeInterval = currentTime - previousTime;
-
-	    //Berechne Blickrichtung
-	    GLdouble tmpEyeX, tmpEyeY, tmpEyeZ;
-
-	    tmpEyeX = sin(mouseDirectionY*PI/180)*sin(mouseDirectionX*PI/180);
-	    tmpEyeZ = sin(mouseDirectionY*PI/180)*cos(mouseDirectionX*PI/180);
-	    tmpEyeY = cos(mouseDirectionY*PI/180);
-
-	    //Bewegung Berechnen
-	    if(forward)
-	    {
-	    	eyeX += timeInterval * tmpEyeX / 10;
-	    	eyeY += timeInterval * tmpEyeY / 10;
-	    	eyeZ += timeInterval * tmpEyeZ / 10;
-	    }
-	    if(backward)
-	    {
-	    	eyeZ -= timeInterval * tmpEyeZ / 10;
-	    	eyeY -= timeInterval * tmpEyeY / 10;
-	    	eyeX -= timeInterval * tmpEyeX / 10;
-	    }
-	    if(left)
-	    {
-	    	eyeX += timeInterval * sin((mouseDirectionX+90)*PI/180) / 10;
-	    	eyeZ += timeInterval * cos((mouseDirectionX+90)*PI/180) / 10;
-	    }
-	    if(right)
-	    {
-	    	eyeX -= timeInterval * sin((mouseDirectionX+90)*PI/180) / 10;
-	    	eyeZ -= timeInterval * cos((mouseDirectionX+90)*PI/180) / 10;
-	    }
-
-
-	    previousTime = currentTime;
-
-	    glLoadIdentity();
-
-
-		gluLookAt(	eyeX, eyeY, eyeZ,
-					eyeX + tmpEyeX, eyeY + tmpEyeY, eyeZ + tmpEyeZ ,
-					0.0f, 10.0f,  0.0f);
-
-
-		//Maus wieder in die mitte Positionieren
-		if(mouseWarp)
-			glutWarpPointer(windowWidth / 2, windowHeight / 2);
-	}
-
-	//Getter und Setter
-
-	void toggleMouseWarp()
-	{
-		mouseWarp = !mouseWarp;
-	}
-	void goFarwardStart()
-	{
-		forward = true;
-	}
-
-	void goFarwardStop()
-	{
-		forward = false;
-	}
-
-	void goBackwardStart()
-	{
-		backward = true;
-	}
-
-	void goBackwardStop()
-	{
-		backward = false;
-	}
-
-	void goLeftStart()
-	{
-		left = true;
-	}
-
-	void goLeftStop()
-	{
-		left = false;
-
-	}
-
-	void goRightStart()
-	{
-		right = true;
-	}
-
-	void goRightStop()
-	{
-		right = false;
-	}
-
 
 GLMmodel* cabeza = NULL;
 GLMmodel* cuello = NULL;
@@ -209,6 +52,15 @@ GLMmodel* pie_der = NULL;
 GLuint texture;
 Texture treeTextureAr[7];
 
+void suelo() {
+    glBegin(GL_QUADS);
+    glVertex3f(-10.0, 0.0, -10.0); // Esquina inferior izquierda
+    glVertex3f(-10.0, 0.0, 10.0);  // Esquina inferior derecha
+    glVertex3f(10.0, 0.0, 10.0);   // Esquina superior derecha
+    glVertex3f(10.0, 0.0, -10.0);  // Esquina superior izquierda
+    glEnd();
+}
+
 bool LoadTreeTextures()
 {
     int i;
@@ -237,11 +89,12 @@ bool LoadTreeTextures()
 
 void init(void)
 {
-    glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);    
+    glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    
 
-    GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+    GLfloat light_position[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 
@@ -249,67 +102,83 @@ void init(void)
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
-    glClearColor(0.7, 0.7, 0.8, 0.0);
+    glClearColor(0.1, 0.1, 0.1, 0.0);
     LoadTreeTextures();
     glShadeModel(GL_SMOOTH);
 }
 
 void graficar(void) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-
+      
     double eyex = 25.0*cos(camera_angle*PI/180);
     double eyez = 25.0*sin(camera_angle*PI/180);
 
-    gluLookAt(eyex, 10.0, -eyez, 0.0, 3.0, 0.0, 0.0f, 1.0f, 0.0f);
+
+   double horizontal_offset = horizontal_angle * PI / 180;
+
+    gluLookAt(eyex, ojos, -eyez,
+              eyex + sin(horizontal_offset), ojos, -eyez + cos(horizontal_offset),
+              0.0f, 1.0f, 0.0f);
 
     glPushMatrix();
-    glTranslatef(10,10,10);
-    glutSolidCube(1);
-    glPopMatrix();
-    //glRotatef(-70, 0, 1, 0);
-    glTranslatef(0, -1, 0);
-    glScalef(4.7,4.7,4.7);
-
-    glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-        glmDraw(pecho, GLM_SMOOTH |GLM_TEXTURE);
-        //CUELLO
+    //glRotatef(-90, 0, 1, 0);
+    glScalef(5,5,5);
+    glTranslatef(adelante, altura, costados);
+    glRotatef(girar, 0,0,0);
+    
         glPushMatrix();
+        glTranslatef(-4,1,0);
+        glutSolidCube(1);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(0,0,0);
+        suelo();
+        glPopMatrix();
+
+        glPushMatrix();
+        glRotatef(90,0,1,0);
+        glTranslatef(0,0,0);
+
             glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-            glmDraw(cuello, GLM_SMOOTH |GLM_TEXTURE);
-            //CABEZA
+            glmDraw(pecho, GLM_SMOOTH |GLM_TEXTURE);
+            //CUELLO
             glPushMatrix();
-                glBindTexture(GL_TEXTURE_2D, treeTextureAr[0].texID);
-                glmDraw(cabeza, GLM_SMOOTH |GLM_TEXTURE);
-            glPopMatrix();
-        glPopMatrix();
-        glPushMatrix();
-            glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-            glmDraw(brazo_izq, GLM_SMOOTH |GLM_TEXTURE);
-                glPushMatrix();    
-                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-                    glmDraw(antebrazo_izq, GLM_SMOOTH |GLM_TEXTURE);
-                    glPushMatrix();
-                        glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-                        glmDraw(mano_izq, GLM_SMOOTH |GLM_TEXTURE);
-                    glPopMatrix();
-                glPopMatrix();
-        glPopMatrix();
-
-
-        glPushMatrix();
-            glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-            glmDraw(brazo_der, GLM_SMOOTH |GLM_TEXTURE);
+                glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
+                glmDraw(cuello, GLM_SMOOTH |GLM_TEXTURE);
+                //CABEZA
                 glPushMatrix();
-                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-                    glmDraw(antebrazo_der, GLM_SMOOTH |GLM_TEXTURE);
+                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[0].texID);
+                    glmDraw(cabeza, GLM_SMOOTH |GLM_TEXTURE);
+                glPopMatrix();
+            glPopMatrix();
+
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
+                glmDraw(brazo_izq, GLM_SMOOTH |GLM_TEXTURE);
+                    glPushMatrix();    
+                        glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
+                        glmDraw(antebrazo_izq, GLM_SMOOTH |GLM_TEXTURE);
+                        glPushMatrix();
+                            glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
+                            glmDraw(mano_izq, GLM_SMOOTH |GLM_TEXTURE);
+                        glPopMatrix();
+                    glPopMatrix();
+            glPopMatrix();
+
+
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
+                glmDraw(brazo_der, GLM_SMOOTH |GLM_TEXTURE);
                     glPushMatrix();
                         glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
-                        glmDraw(mano_der, GLM_SMOOTH |GLM_TEXTURE);
+                        glmDraw(antebrazo_der, GLM_SMOOTH |GLM_TEXTURE);
+                        glPushMatrix();
+                            glBindTexture(GL_TEXTURE_2D, treeTextureAr[1].texID);
+                            glmDraw(mano_der, GLM_SMOOTH |GLM_TEXTURE);
                             glPushMatrix();
                                 glBindTexture(GL_TEXTURE_2D, treeTextureAr[4].texID);
                                 glmDraw(palo, GLM_SMOOTH | GLM_TEXTURE);
@@ -318,106 +187,53 @@ void graficar(void) {
                                     glmDraw(cadena, GLM_SMOOTH | GLM_TEXTURE);
                                 glPopMatrix();
                             glPopMatrix();
+                        glPopMatrix();
+                    glPopMatrix();
+            glPopMatrix();
+
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
+                glmDraw(cintura, GLM_SMOOTH |GLM_TEXTURE);
+                glPushMatrix();
+                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
+                    glmDraw(pierna_izq, GLM_SMOOTH |GLM_TEXTURE);
+                    glPushMatrix();
+                        glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
+                        glmDraw(pantorrilla_izq, GLM_SMOOTH |GLM_TEXTURE);
+                        glPushMatrix();
+                            glBindTexture(GL_TEXTURE_2D, treeTextureAr[3].texID);
+                            glmDraw(pie_izq, GLM_SMOOTH |GLM_TEXTURE);
+                        glPopMatrix();
                     glPopMatrix();
                 glPopMatrix();
-        glPopMatrix();
 
-    glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
-        glmDraw(cintura, GLM_SMOOTH |GLM_TEXTURE);
-        glPushMatrix();
-            glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
-            glmDraw(pierna_izq, GLM_SMOOTH |GLM_TEXTURE);
-            glPushMatrix();
-                glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
-                glmDraw(pantorrilla_izq, GLM_SMOOTH |GLM_TEXTURE);
                 glPushMatrix();
-                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[3].texID);
-                    glmDraw(pie_izq, GLM_SMOOTH |GLM_TEXTURE);
+                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
+                    glmDraw(pierna_der, GLM_SMOOTH |GLM_TEXTURE);
+                    glPushMatrix();
+                        glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
+                        glmDraw(pantorrilla_der, GLM_SMOOTH |GLM_TEXTURE);
+                        glPushMatrix();
+                            glBindTexture(GL_TEXTURE_2D, treeTextureAr[3].texID);
+                            glmDraw(pie_der, GLM_SMOOTH |GLM_TEXTURE);
+                        glPopMatrix();
+                    glPopMatrix();
                 glPopMatrix();
             glPopMatrix();
         glPopMatrix();
-
-        glPushMatrix();
-
-            glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
-            glmDraw(pierna_der, GLM_SMOOTH |GLM_TEXTURE);
-            glPushMatrix();
-                glBindTexture(GL_TEXTURE_2D, treeTextureAr[2].texID);
-                glmDraw(pantorrilla_der, GLM_SMOOTH |GLM_TEXTURE);
-                glPushMatrix();
-                    glBindTexture(GL_TEXTURE_2D, treeTextureAr[3].texID);
-                    glmDraw(pie_der, GLM_SMOOTH |GLM_TEXTURE);
-                glPopMatrix();
-            glPopMatrix();
-        glPopMatrix();
-
 
     glPopMatrix();
-
 
     glutSwapBuffers();
 }
 
-void redimensionar(int w, int h)
-{
+void redimensionar(int w, int h){
     glViewport(0, 0, (GLsizei)w, (GLsizei)h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0, (GLfloat)w / (GLfloat)h, 1.0, 500.0);
 }
-/*
-void animate(int i) {
-    ypoz += 0.1;
-    if (ypoz > 360) ypoz = 0;
-    glutPostRedisplay();
-    glutTimerFunc(16, animate, 1);
-}
 
-
-void girarBrazo(int i) {
-    anguloBrazoDer += velocidadBrazoDer;
-    if(anguloBrazoDer >= 10 || anguloBrazoDer <= -20){
-        velocidadBrazoDer = velocidadBrazoDer * -1;
-    }
-    glutPostRedisplay();
-    glutTimerFunc(16, girarBrazo, 1);
-}
-
-void girarBrazoIzq(int i) {
-    anguloBrazoIzq -= velocidadBrazoIzq;
-    if(anguloBrazoIzq >= 10 || anguloBrazoIzq <= -20){
-        velocidadBrazoIzq = velocidadBrazoIzq * -1;
-    }
-    glutPostRedisplay();
-    glutTimerFunc(16, girarBrazoIzq, 1);
-}
-
-void girarPiernaIzq(int i) {
-    anguloPiernaIzq -=velocidadPiernaIzq;
-    if(anguloPiernaIzq >= 10 || anguloPiernaIzq <= -13){
-        velocidadPiernaIzq = velocidadPiernaIzq * -1;
-    }
-    glutPostRedisplay();
-    glutTimerFunc(16, girarPiernaIzq, 1);
-}
-
-void girarPiernaDer(int i) {
-    anguloPiernaDer +=velocidadPiernaDer;
-    if(anguloPiernaDer >= 10 || anguloPiernaDer <= -13){
-        velocidadPiernaDer = velocidadPiernaDer * -1;
-    }
-    glutPostRedisplay();
-    glutTimerFunc(16, girarPiernaDer, 1);
-}
-
-void girarCadena(int i) {
-    velocidadCadena += 3.7;
-	if (velocidadCadena>360) velocidadCadena = 0;
-	glutPostRedisplay();
-	glutTimerFunc(16, girarCadena, 1);
-}
-*/
 void spinDisplay(void) {
     camera_angle = camera_angle + 0.1;
     if(camera_angle>360.0)
@@ -439,20 +255,72 @@ void mouse(int button, int state, int x, int y) {
 
     default:
         break;
-
     }
+}
+
+void keyboard(unsigned char key, int x, int y) {    
+    switch (key)
+    {
+        case 27:
+        exit(0);
+        break;
+
+        case 'w':
+        adelante+=0.1;
+        break;
+
+        case 's':
+        adelante-=0.1;
+        break;
+
+        case 'a':
+        costados-=0.1;
+        break;
+
+        case 'd':
+        costados+=0.1;
+        break;
+
+        case '<':
+        altura+=3.1;
+        if (altura > 3.1)
+        altura=3.1;
+
+        case '>':
+        altura-=3.0;
+        if (altura<0.0)
+        altura=-0.0;
+        break;
+
+        case 'j':
+            horizontal_angle -= rotation_speed;
+            break;
+
+        case 'l':
+            horizontal_angle += rotation_speed;
+            break;
+        break;
+
+        case 'i':
+        apunta+=0.5;
+        break;
+        case 'k':
+        apunta-=0.5;
+        break;
+    }
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-    glutInitWindowSize(1000, 900);
+
+    glutInitWindowSize(1400, 900);
     glutInitWindowPosition(300, 50);
     glutCreateWindow("OpenGl project");
-    glutSetCursor(GLUT_CURSOR_CROSSHAIR);
     init();
-
+    
     cabeza = glmReadOBJ(const_cast<char*>("models/obj/cabeza.obj"));
     cuello = glmReadOBJ(const_cast<char*>("models/obj/cuello.obj"));
 
@@ -461,7 +329,6 @@ int main(int argc, char** argv)
     brazo_izq = glmReadOBJ(const_cast<char*>("models/obj/brazo_izq.obj"));
     antebrazo_izq = glmReadOBJ(const_cast<char*>("models/obj/antebrazo_izq.obj"));
     mano_izq = glmReadOBJ(const_cast<char*>("models/obj/mano_izq.obj"));
-
 
     brazo_der = glmReadOBJ(const_cast<char*>("models/obj/brazo_der.obj"));
     antebrazo_der = glmReadOBJ(const_cast<char*>("models/obj/antebrazo_der.obj"));
@@ -481,13 +348,10 @@ int main(int argc, char** argv)
 
 
     glutDisplayFunc(graficar);
-    glutReshapeFunc(redimensionar);/*
-    glutTimerFunc(16, girarBrazo, 1);
-    glutTimerFunc(16, girarBrazoIzq, 1);
-    glutTimerFunc(16, girarCadena, 1);
-    glutTimerFunc(16, girarPiernaIzq, 1);
-    glutTimerFunc(16, girarPiernaDer, 1);*/
-    glutMouseFunc(mouse);
+    glutReshapeFunc(redimensionar);
+    glutKeyboardFunc(keyboard);
+
+    //glutMouseFunc(mouse);
     glutMainLoop();
     return 0;
 }
